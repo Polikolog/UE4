@@ -1,0 +1,12 @@
+*.sln
+*.suo
+*.VC.db
+Binaries
+TestingGrounds/.vs/TestingGrounds/v17/Browse.VC.db
+Intermediate
+Saved
+*.opensdf
+*.opendb
+*.sdf
+*.xcodeproj
+*.xcworkspace
