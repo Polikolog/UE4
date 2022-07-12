@@ -1,4 +1,4 @@
-<h1 align="center">UE4 </h1>
+<h1 align="center">UE4 <img src="https://github.com/Polikolog/UE4/blob/main/Images(psss)/unrealengine.svg" height="32"/></h1>
 <h3 align="center">Repository for UE4 projects</h3>
 
 Here I will post various projects created on the **Unreal Engine 4** game engine. 
