@@ -3,3 +3,13 @@
 
 Here I will post various projects created on the **Unreal Engine 4** game engine. 
 Most of the projects will be written in **C++**, but Blueprint technology will also be used.
+
+
+
+---
+
+
+
+Rus
+---
+Тут короче будет всякое гэ. Скорее всего его никто не увидет, т.к. он (репозиторий) будет в привате, но все таки для самого себя и для приобретения хоть какого-то опыта, я буду вести время от времени эту страницу README. Хз насколько это зайдет но все может быть... 
