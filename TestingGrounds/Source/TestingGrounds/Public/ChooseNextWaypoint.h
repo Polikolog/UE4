@@ -6,6 +6,8 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "ChooseNextWaypoint.generated.h"
 
+class APatrollingGuard;
+
 /**
  * 
  */
@@ -22,9 +24,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector Waypoint;
-	
-private:
-	void GetPatrolPoints(UObject*);
-
-	
 };

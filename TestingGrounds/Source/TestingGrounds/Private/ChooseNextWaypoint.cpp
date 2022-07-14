@@ -1,18 +1,25 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "ChooseNextWaypoint.h"
+#include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "PatrollingGuard.h"
 
 EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	auto BlackboardComp = OwnerComp.GetBlackboardComponent();
-	auto IndexQ = BlackboardComp->GetValueAsInt(Index.SelectedKeyName);
-	UE_LOG(LogTemp, Warning, TEXT("Index: %i"), IndexQ)
-	return EBTNodeResult::Succeeded;
-}
-
-void UChooseNextWaypoint::GetPatrolPoints(UObject* Person)
-{
+	auto AIController = OwnerComp.GetAIOwner();
+	auto ControllePawn = AIController->GetPawn();
 	
+	auto Person = Cast<APatrollingGuard>(ControllePawn);
+
+	auto IndexQ = BlackboardComp->GetValueAsInt(Index.SelectedKeyName);
+
+	BlackboardComp->SetValueAsObject(Waypoint.SelectedKeyName, Person->Points[IndexQ]);
+
+	auto Procent = (IndexQ + 1) % Person->Points.Num();
+
+	BlackboardComp->SetValueAsInt(Index.SelectedKeyName, Procent);
+
+	return EBTNodeResult::Succeeded;
 }
