@@ -10,3 +10,5 @@ Saved
 *.sdf
 *.xcodeproj
 *.xcworkspace
+*.ipch
+.vs/
