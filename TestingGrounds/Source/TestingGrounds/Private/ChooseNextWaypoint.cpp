@@ -17,7 +17,7 @@ EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent& Own
 	auto IndexQ = BlackboardComp->GetValueAsInt(Index.SelectedKeyName);
 	auto Points = PatrolRouteComponent->GetPoints();
 
-	if (ensure(Points.Num() < 1)) { return EBTNodeResult::Failed; }
+	if (Points.Num() < 1) { return EBTNodeResult::Failed; }
 
 	BlackboardComp->SetValueAsObject(Waypoint.SelectedKeyName, Points[IndexQ]);
 
