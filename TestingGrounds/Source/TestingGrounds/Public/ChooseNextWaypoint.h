@@ -6,7 +6,7 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "ChooseNextWaypoint.generated.h"
 
-class APatrollingGuard;
+class UPatrolRouteComponent;
 
 /**
  * 

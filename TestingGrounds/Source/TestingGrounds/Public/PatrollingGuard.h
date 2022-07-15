@@ -6,15 +6,13 @@
 #include "TestingGrounds/TP_ThirdPerson/TP_ThirdPersonCharacter.h"
 #include "PatrollingGuard.generated.h"
 
+class UPatrolRouteComponent;
 /**
  * 
  */
-UCLASS()
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TESTINGGROUNDS_API APatrollingGuard : public ATP_ThirdPersonCharacter
 {
 	GENERATED_BODY()
-	
-public:
-	UPROPERTY(EditInstanceOnly, Category = "PatrolPoints")
-	TArray<AActor*> Points;
+
 };
