@@ -15,7 +15,12 @@
       "ProjectGuid": "758c6212-4c75-4437-9542-ac9961c478f4",
       "DisplayName": "TestingGrounds",
       "ColorIndex": 1
+    },
+    "b7b99085-9ba2-403d-8527-74f633f764c2": {
+      "ProjectGuid": "b7b99085-9ba2-403d-8527-74f633f764c2",
+      "DisplayName": "TestingGrounds",
+      "ColorIndex": 2
     }
   },
-  "NextColorIndex": 2
+  "NextColorIndex": 3
 }
