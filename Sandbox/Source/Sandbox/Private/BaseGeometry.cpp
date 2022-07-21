@@ -3,6 +3,8 @@
 
 #include "BaseGeometry.h"
 #include "Engine/Engine.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "TimerManager.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSandboxGeometry, All, All)
 
@@ -23,6 +25,15 @@ void ABaseGeometry::BeginPlay()
 	
 	InitialLocation = GetActorLocation();
 
+	GetWorldTimerManager().SetTimer(TimerHandel, this, &ABaseGeometry::OnTimerFired, GeometryData.TimeRange, true);
+
+}
+
+void ABaseGeometry::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UE_LOG(LogTemp, Error, TEXT("Actor %s destroy!"), *GetName())
+
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
@@ -41,6 +52,8 @@ void ABaseGeometry::HandleMovement()
 		case EMovementType::Sin:
 		{
 			FVector CurrentLocation = GetActorLocation();
+
+			if (!ensure(GetWorld())) { return; }
 			float Time = GetWorld()->GetTimeSeconds();
 			CurrentLocation.Z = InitialLocation.Z + GeometryData.Amplitude * FMath::Sin(GeometryData.Frequency * Time);
 
@@ -52,6 +65,31 @@ void ABaseGeometry::HandleMovement()
 		}
 		default: break;
 	}
+}
+
+void ABaseGeometry::SetColor(const FLinearColor& Color)
+{
+	if (!ensure(BaseMesh)) { return; }
+	UMaterialInstanceDynamic* DynMaterial = BaseMesh->CreateAndSetMaterialInstanceDynamic(0);
+	if (DynMaterial)
+	{
+		DynMaterial->SetVectorParameterValue("Color", Color);
+	}
+}
+
+void ABaseGeometry::OnTimerFired()
+{
+	if (CurrentTimerCount >= MaxTimerCount) 
+	{ 
+		GetWorldTimerManager().ClearTimer(TimerHandel);
+		OnTimerFinished.Broadcast(this);
+		return; 
+	}
+	const FLinearColor NewColor = FLinearColor::MakeRandomColor();
+	UE_LOG(LogSandboxGeometry, Warning, TEXT(" \t\t\t %s\n \t\t\tColor in actor: %s"), *GetName(), *NewColor.ToString())
+	SetColor(NewColor);
+	CurrentTimerCount++;
+	OnColorChanged.Broadcast(NewColor, GetName());
 }
 
 void ABaseGeometry::printTypes()
@@ -74,6 +112,7 @@ void ABaseGeometry::printTypes()
 
 	UE_LOG(LogSandboxGeometry, Log, TEXT("%s"), *Stat)
 
+	if (!ensure(GEngine)) { return; }
 	GEngine->AddOnScreenDebugMessage(-1, 
 		3.f,
 		FColor::Green,
@@ -100,4 +139,12 @@ void ABaseGeometry::printTransform()
 	UE_LOG(LogSandboxGeometry, Warning, TEXT("Human Transform: %s"),
 		*Transform.ToHumanReadableString())
 
+}
+
+FString FGeometryData::ToString()
+{
+	return FString::SanitizeFloat(Amplitude) + "; "
+		+ FString::SanitizeFloat(Frequency) + "; \n"
+		+ Color.ToString() + "\n"
+		+ FString();
 }
