@@ -7,7 +7,9 @@
 #include "Components/StaticMeshComponent.h"
 #include "BaseGeometry.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnColorChanged, const FLinearColor&, Color, const FString&, Name);
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTimerFinished, AActor*);
 
 UENUM(BlueprintType)
 enum class EMovementType : uint8
@@ -23,14 +25,22 @@ struct FGeometryData
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float Amplitude = 10.f;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float Frequency = 2.f;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementType MoveType = EMovementType::Static;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Design")
+	FLinearColor Color = FLinearColor::Black;
+
+	UPROPERTY(EditAnywhere, Category = "Timer")
+	float TimeRange = 3.f;
+
+	FString ToString();
 };
 
 
@@ -47,11 +57,23 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* BaseMesh = nullptr;
 
+	void SetGeometryData(const FGeometryData& Data) { GeometryData = Data; }
+
+	UFUNCTION(BlueprintCallable)
+	FGeometryData GetGeometryData() const { return GeometryData; }
+
+	UPROPERTY(BlueprintAssignable)
+	FOnColorChanged OnColorChanged;
+
+	FOnTimerFinished OnTimerFinished;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
-	UPROPERTY(EditAnywhere, Category = "Geometry Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Geometry Data")
 	FGeometryData GeometryData;
 
 	UPROPERTY(EditAnywhere , Category = "Weapon")
@@ -71,10 +93,15 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	const int32 MaxTimerCount = 5;
+	int32 CurrentTimerCount = 0;
+
 	FVector InitialLocation;
+	FTimerHandle TimerHandel;
 
 	void printTypes();
 	void printTransform();
 	void HandleMovement();
-
+	void SetColor(const FLinearColor& Color);
+	void OnTimerFired();
 };
