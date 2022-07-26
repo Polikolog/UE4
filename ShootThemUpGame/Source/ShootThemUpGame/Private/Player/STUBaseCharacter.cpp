@@ -4,20 +4,27 @@
 #include "Player/STUBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/STUHealthComponent.h"
+#include "Components/TextRenderComponent.h"
 
 // Sets default values
 ASTUBaseCharacter::ASTUBaseCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = true;
 
-	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("Spring Arm");
-	SpringArmComponent->SetupAttachment(GetRootComponent());
-	SpringArmComponent->bUsePawnControlRotation = true;
+    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("Spring Arm");
+    SpringArmComponent->SetupAttachment(GetRootComponent());
+    SpringArmComponent->bUsePawnControlRotation = true;
 
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>("Camera Component");
-	CameraComponent->SetupAttachment(SpringArmComponent);
+    CameraComponent = CreateDefaultSubobject<UCameraComponent>("Camera Component");
+    CameraComponent->SetupAttachment(SpringArmComponent);
 
+    HealthComponent = CreateDefaultSubobject<USTUHealthComponent>("Health Component");
+
+    TextRenderComponent = CreateDefaultSubobject<UTextRenderComponent>("Text Render Component");
+    TextRenderComponent->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +32,14 @@ void ASTUBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+    check(HealthComponent) 
+    check(CameraComponent)
+    check(GetCharacterMovement())
+
+    OnHealthChange(HealthComponent->GetHealth());
+
+    HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
+    HealthComponent->OnHealthChange.AddUObject(this, &ASTUBaseCharacter::OnHealthChange);
 }
 
 // Called every frame
@@ -44,24 +59,78 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUp", this, &ASTUBaseCharacter::LookUp);
 	PlayerInputComponent->BindAxis("TurnAround", this, &ASTUBaseCharacter::TurnAround);
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
+    PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASTUBaseCharacter::BeginSprint);
+    PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASTUBaseCharacter::EndSprint);
+    PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASTUBaseCharacter::BeginCrouch);
+    PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASTUBaseCharacter::EndCrouch);
+}
+
+float ASTUBaseCharacter::GetMovementDirection() const
+{
+    if (GetVelocity().IsZero()) { return 0.f; }
+    const auto VelocityNormal = GetVelocity().GetSafeNormal();
+    const auto AngelBetween = FMath::Acos(FVector::DotProduct(VelocityNormal, GetActorForwardVector()));
+    const auto CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
+    float Degrees = FMath::RadiansToDegrees(AngelBetween);
+    return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
 }
 
 void ASTUBaseCharacter::MoveForward(float Amount)
 {
+    if (Amount == 0.f) return;
 	AddMovementInput(GetActorForwardVector(), Amount);
 }
 
 void ASTUBaseCharacter::MoveRight(float Amount)
 {
+    if (Amount == 0.f) return;
 	AddMovementInput(GetActorRightVector(), Amount);
 }
 
 void ASTUBaseCharacter::LookUp(float Amount)
 {
+    if (Amount == 0.f)
+        return;
 	AddControllerPitchInput(Amount);
 }
 
 void ASTUBaseCharacter::TurnAround(float Amount)
 {
+    if (Amount == 0.f)
+        return;
 	AddControllerYawInput(Amount);
+}
+
+void ASTUBaseCharacter::BeginSprint() 
+{
+    GetCharacterMovement()->MaxWalkSpeed = 1000.f;
+}
+
+void ASTUBaseCharacter::EndSprint() 
+{
+    GetCharacterMovement()->MaxWalkSpeed = 600.f;
+}
+
+void ASTUBaseCharacter::BeginCrouch() 
+{
+    Crouch();
+}
+
+void ASTUBaseCharacter::EndCrouch() 
+{
+    UnCrouch();
+}
+
+void ASTUBaseCharacter::OnDeath() 
+{
+    PlayAnimMontage(DeathAnimMotage);
+
+    GetCharacterMovement()->DisableMovement();
+
+    SetLifeSpan(5.0f);
+}
+
+void ASTUBaseCharacter::OnHealthChange(float Health) 
+{
+    TextRenderComponent->SetText(FString::SanitizeFloat(Health, 0));
 }
