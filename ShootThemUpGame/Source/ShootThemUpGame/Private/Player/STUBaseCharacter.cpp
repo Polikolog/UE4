@@ -7,6 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/STUHealthComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "GameFramework/Controller.h"
+#include "Weapon/STUBaseWeapon.h"
 
 // Sets default values
 ASTUBaseCharacter::ASTUBaseCharacter()
@@ -40,6 +42,10 @@ void ASTUBaseCharacter::BeginPlay()
 
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
     HealthComponent->OnHealthChange.AddUObject(this, &ASTUBaseCharacter::OnHealthChange);
+
+    LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
+
+    SpawnWeapon();
 }
 
 // Called every frame
@@ -47,6 +53,7 @@ void ASTUBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    
 }
 
 // Called to bind functionality to input
@@ -125,12 +132,41 @@ void ASTUBaseCharacter::OnDeath()
 {
     PlayAnimMontage(DeathAnimMotage);
 
+    //HealthComponent->DestroyComponent();
+
     GetCharacterMovement()->DisableMovement();
 
     SetLifeSpan(5.0f);
+
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
 }
 
 void ASTUBaseCharacter::OnHealthChange(float Health) 
 {
     TextRenderComponent->SetText(FString::SanitizeFloat(Health, 0));
+    auto Time = GetWorld()->GetTimeSeconds();
+}
+
+void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit) 
+{
+    const auto FallVelocityZ = -GetCharacterMovement()->Velocity.Z;
+
+    if (FallVelocityZ < LandedDamageVelocity.X)
+        return;
+
+    const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
+    TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
+}
+
+void ASTUBaseCharacter::SpawnWeapon() 
+{
+    if (!ensure(GetWorld())) return;
+    const auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(BaseWeapon);
+    if (!ensure(Weapon))
+        return;
+    FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+    Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponPoint");
 }

@@ -21,10 +21,22 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Health", meta = (ClampMin = "0.00", ClampMax = "1000.00"))
 	float MaxHealth = 100.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
+    bool AutoHealing = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Health", meta = (EditCondition = "AutoHealing"))
+    float UpdateTimeHealing = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Health", meta = (EditCondition = "AutoHealing"))
+    float RangeHealing = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Health", meta = (EditCondition = "AutoHealing"))
+    float DelayHealing = 3.f;
+
     float GetHealth() const { return Health; }
 
 	UFUNCTION(BLueprintCallable)
-    bool IsDead() const { return Health <= 0.00f; }
+    bool IsDead() const { return FMath::IsNearlyZero(Health); }
 
 	FOnDeath OnDeath;
 
@@ -35,8 +47,13 @@ public:
 	virtual void BeginPlay() override;
 
 private:
+    FTimerHandle OutTimer;
 
     float Health = 0.f;
+
+	void Heal();
+
+	void SetHealth(float NewHealth);
 
 	UFUNCTION()
 	void OnTakeDamageHandler(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
