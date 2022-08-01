@@ -15,13 +15,19 @@ public:
 	// Sets default values for this actor's properties
 	ASTUBaseWeapon();
 
+	virtual void Fire();
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FName MuzzleSocketName = "MuzzleFlashSocket";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    float TraceMaxDistance = 1500.f;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:
-
+	void MakeShot();
 };
