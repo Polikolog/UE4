@@ -17,6 +17,17 @@ public:
 
 	virtual void Fire();
 
+	bool GetTraceData(FVector& TraceStrat, FVector& TraceEnd) const;
+
+    APlayerController* GetPlayerController() const;
+
+    bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
+
+    FVector GetMuzzleWorldLocation() const;
+
+private:
+    void MakeDamage(const FHitResult& HitResult);
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
@@ -26,6 +37,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     float TraceMaxDistance = 1500.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float DamageAmount = 10.0f;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
