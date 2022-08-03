@@ -76,7 +76,8 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASTUBaseCharacter::EndSprint);
     PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASTUBaseCharacter::BeginCrouch);
     PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASTUBaseCharacter::EndCrouch);
-    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Fire);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::StartFire);
+    PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &USTUWeaponComponent::StopFire);
 }
 
 float ASTUBaseCharacter::GetMovementDirection() const

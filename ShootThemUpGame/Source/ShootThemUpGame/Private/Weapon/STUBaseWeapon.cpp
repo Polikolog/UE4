@@ -27,34 +27,17 @@ void ASTUBaseWeapon::BeginPlay()
 
 void ASTUBaseWeapon::MakeShot() 
 {
-    if (!ensure(GetWorld()))
-        return;
 
-    FVector TraceStart, TraceEnd;
-    if(!GetTraceData(TraceStart, TraceEnd))
-        return;
-
-    FCollisionQueryParams QueryParams;
-    QueryParams.AddIgnoredActor(GetOwner());
-    FHitResult HitResult;
-    GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
-
-    if (HitResult.bBlockingHit)
-    {
-        MakeDamage(HitResult);
-        DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
-        DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.0f, 20, FColor::Red, false, 3.f, 0, 3.0f);
-        
-    }
-    else
-    {
-        DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
-    }
 }
 
-void ASTUBaseWeapon::Fire() 
+void ASTUBaseWeapon::StartFire() 
 {
-    MakeShot();
+
+}
+
+void ASTUBaseWeapon::StopFire()
+{
+
 }
 
 bool ASTUBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const 
@@ -65,8 +48,8 @@ bool ASTUBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
         return false;
 
     TraceStart = ViewLocation;              // GetMuzzleWorldLocation();
-    //const FVector ShootDirection = ViewRotation.Vector(); // SocketTransform.GetRotation().GetForwardVector();
-    TraceEnd = TraceStart + ViewRotation.Vector() * TraceMaxDistance;
+    const FVector ShootDirection = ViewRotation.Vector(); // SocketTransform.GetRotation().GetForwardVector();
+    TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
     return true;
 }
 

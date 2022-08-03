@@ -29,12 +29,18 @@ void USTUWeaponComponent::SpawnWeapon()
     
     FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
     CurrentWeapon->AttachToComponent(Character->GetMesh(), AttachmentRules, WeaponAttachPointName);
-
     CurrentWeapon->SetOwner(Character);
 }
 
-void USTUWeaponComponent::Fire() 
+void USTUWeaponComponent::StartFire()
 {
     if (!ensure(CurrentWeapon)) return;
-    CurrentWeapon->Fire();
+    CurrentWeapon->StartFire();
+}
+
+void USTUWeaponComponent::StopFire()
+{
+    if (!ensure(CurrentWeapon))
+        return;
+    CurrentWeapon->StopFire();
 }
